@@ -17,7 +17,7 @@ brands: IBrand[];
 types: IType[];
 shopParams = new ShopParams();
 totalCount: number;
-@ViewChild('search', {static: true}) searchTearm: ElementRef;
+@ViewChild('search', {static: false}) searchTearm: ElementRef;
 
 sortOptions = [
  { name: 'Alphabetical', value: 'name'},
