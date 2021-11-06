@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using API.Helpers;
 using API.Middleware;
 using API.Extensions;
+using StackExchange.Redis;
 
 namespace API
 {
@@ -30,7 +31,15 @@ namespace API
             {
                 options.UseSqlServer(_config.GetConnectionString("DefaultConnection"));
             });
-           services.AddApplicationServices();
+            services.AddSingleton<IConnectionMultiplexer>(c =>
+            {
+                var configiuration = ConfigurationOptions.Parse(_config.GetConnectionString("Redis"),
+                    true);
+                return ConnectionMultiplexer.Connect(configiuration);
+
+
+            });
+            services.AddApplicationServices();
            services.AddSwaggerDocumentation();
            services.AddCors(opt => {
                opt.AddPolicy("CorsPolicy", policy => {
@@ -47,9 +56,7 @@ namespace API
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseMiddleware<ExceptionMiddleware>();
-                        
-          
-            
+                       
             app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
             app.UseHttpsRedirection();
