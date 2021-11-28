@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using API.Helpers;
 using API.Middleware;
 using API.Extensions;
+using Infrastructure.Identity;
 using StackExchange.Redis;
 
 namespace API
@@ -31,6 +32,10 @@ namespace API
             {
                 options.UseSqlServer(_config.GetConnectionString("DefaultConnection"));
             });
+            services.AddDbContext<AppIdentityDbContext>(x =>
+            {
+                x.UseSqlServer(_config.GetConnectionString("IdentityConnection"));
+            });
             services.AddSingleton<IConnectionMultiplexer>(c =>
             {
                 var configiuration = ConfigurationOptions.Parse(_config.GetConnectionString("Redis"),
@@ -39,7 +44,9 @@ namespace API
 
 
             });
+          
             services.AddApplicationServices();
+            services.AddIdentityServices(_config);
            services.AddSwaggerDocumentation();
            services.AddCors(opt => {
                opt.AddPolicy("CorsPolicy", policy => {
@@ -66,6 +73,8 @@ namespace API
             app.UseStaticFiles();
 
             app.UseCors("CorsPolicy");
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
